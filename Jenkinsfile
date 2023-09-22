@@ -78,7 +78,7 @@ pipeline {
                 script{
                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         
-                        sh "docker run -d --name petclinic -p 8080:8080 veeru3488/petclinic:latest"
+                        sh "docker run -d --name petclinic -p 8082:8082 veeru3488/petclinic:latest"
                         
                     }
                 }
