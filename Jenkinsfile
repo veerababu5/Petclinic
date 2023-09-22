@@ -2,7 +2,7 @@ pipeline {
     agent any 
     
     tools{
-        jdk 'jdk11'
+        jdk 'jdk17'
         maven 'maven3'
     }
     
@@ -14,7 +14,7 @@ pipeline {
         
         stage("Git Checkout"){
             steps{
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/jaiswaladi246/Petclinic.git'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/veerababu5/Petclinic.git'
             }
         }
         
@@ -57,11 +57,11 @@ pipeline {
         stage("Docker Build & Push"){
             steps{
                 script{
-                   withDockerRegistry(credentialsId: '58be877c-9294-410e-98ee-6a959d73b352', toolName: 'docker') {
+                   withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         
-                        sh "docker build -t image1 ."
-                        sh "docker tag image1 adijaiswal/pet-clinic123:latest "
-                        sh "docker push adijaiswal/pet-clinic123:latest "
+                        sh "docker build -t petclinic ."
+                        sh "docker tag petclinic veeru3488/petclinic:latest "
+                        sh "docker push veeru3488/petclinic:latest "
                     }
                 }
             }
@@ -69,14 +69,26 @@ pipeline {
         
         stage("TRIVY"){
             steps{
-                sh " trivy image adijaiswal/pet-clinic123:latest"
+                sh " trivy image veeru3488/petclinic:latest"
             }
         }
         
-        stage("Deploy To Tomcat"){
+        stage("Docker deploy"){
             steps{
-                sh "cp  /var/lib/jenkins/workspace/CI-CD/target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/ "
+                script{
+                   withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        
+                        sh "docker run -d --name petclinic -p 8080:8080 veeru3488/petclinic:latest"
+                        
+                    }
+                }
             }
         }
+        
+       // stage("Deploy To Tomcat"){
+       //     steps{
+       //         sh "cp  /var/lib/jenkins/workspace/CI-CD/target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/ "
+      //      }
+      //  }
     }
 }
